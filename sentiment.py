@@ -1,17 +1,29 @@
+#!python2
 from textblob import TextBlob
 
 
 def get_polarity(text):
     return TextBlob(text).sentiment.polarity
 
+def get_scores(articles):
+    scores = {}
+    for url, title, text in articles:
+        scores[url] = title, get_polarity(text)
+    return scores
 
 # (url, title, text)
 def newinput(source, tuple_list):
-    result = []
-    score = 0
-    for url, title, text in tuple_list:
-        polarity = get_polarity(text)
-        score += polarity
-        result.append((url, title, polarity))
-    avg = score / len(tuple_list)
-    return result, avg
+    scores = get_scores(tuple_list)
+    avg_score = sum(score for _, score in scores.values()) / len(scores)
+
+    for title, score in scores.values():
+        print "%s: %f" % (title, score)
+    print "Average score: %f" % avg_score
+
+if __name__ == '__main__':
+    examples = [
+        ("http://example.com/1", "Article 1", "This is very good"),
+        ("http://example.com/2", "Article 2", "This is very bad"),
+        ("http://example.com/3", "Article 3", "This is neutral"),
+    ]
+    newinput("Example", examples)
